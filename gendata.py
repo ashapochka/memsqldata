@@ -57,7 +57,7 @@ if __name__ == '__main__':
                         type=str)
     args = parser.parse_args()
     if args.table:
-        gen_ddl(args.pathbase, args.table, cols=args.cols)
+        gen_ddl(args.pathbase, args.table, cols=args.cols, gz=args.gz)
 
     # 100000000 ~ 236 MB gz ~ 1.4 GB csv
     gen_data(args.pathbase, files=args.files, cols=args.cols,
