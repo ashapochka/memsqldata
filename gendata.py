@@ -4,16 +4,23 @@ import csv
 import gzip
 import io
 import argparse
+from datetime import datetime
 
 
 def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
+    print(f'starting data generation for {files} files...')
     for fi in range(files):
-        with gzip.open(f'{pathbase}.{fi}.csv.gz', "w") if gz else open(f'{pathbase}.{fi}.csv', "w") as f:
+        n1 = datetime.now()
+        fpath = f'{pathbase}.{fi}.csv.gz' if gz else f'{pathbase}.{fi}.csv'
+        with gzip.open(fpath, "w") if gz else open(fpath, "w") as f:
             w = csv.writer(io.TextIOWrapper(f) if gz else f)
             cc = list(range(cols))
             w.writerow(['row'] + [f'col{i}' for i in cc])
             for j in range(rows):
                 w.writerow([fi*rows + j] + cc)
+        n2 = datetime.now()
+        secs = (n2 - n1).total_seconds()
+        print(f'{fpath} completed in {secs} secs')
 
 
 # noinspection SqlDialectInspection
