@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime
 import tempfile
 import os
+import shutil
 
 
 def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
@@ -26,7 +27,7 @@ def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
                 w.writerows([fi*rows + j] + cc for j in range(rows))
                 if gz:
                     fo.flush()
-            os.replace(tpath, fpath)
+            shutil.move(tpath, fpath)
         n2 = datetime.now()
         secs = (n2 - n1).total_seconds()
         print(f'{fpath} completed in {secs} secs')
