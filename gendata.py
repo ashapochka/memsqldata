@@ -5,19 +5,28 @@ import gzip
 import io
 import argparse
 from datetime import datetime
+import tempfile
+import os
 
 
 def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
     print(f'starting data generation for {files} files...')
+    cc = list(range(cols))
+    header = ['row'] + [f'col{i}' for i in cc]
     for fi in range(files):
         n1 = datetime.now()
-        fpath = f'{pathbase}.{fi}.csv.gz' if gz else f'{pathbase}.{fi}.csv'
-        with gzip.open(fpath, "w") if gz else open(fpath, "w") as f:
-            w = csv.writer(io.TextIOWrapper(f) if gz else f)
-            cc = list(range(cols))
-            w.writerow(['row'] + [f'col{i}' for i in cc])
-            for j in range(rows):
-                w.writerow([fi*rows + j] + cc)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ext = f'{fi}.csv.gz' if gz else f'{fi}.csv'
+            fpath = f'{pathbase}.{ext}'
+            tpath = os.path.join(tmpdir, ext)
+            with gzip.open(tpath, "w") if gz else open(tpath, "w") as f:
+                fo = io.TextIOWrapper(f) if gz else f
+                w = csv.writer(fo)
+                w.writerow(header)
+                w.writerows([fi*rows + j] + cc for j in range(rows))
+                if gz:
+                    fo.flush()
+            os.replace(tpath, fpath)
         n2 = datetime.now()
         secs = (n2 - n1).total_seconds()
         print(f'{fpath} completed in {secs} secs')
