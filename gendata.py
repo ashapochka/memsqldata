@@ -35,10 +35,13 @@ def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
 
 # noinspection SqlDialectInspection
 def gen_ddl(pathbase, table_name, cols=1, gz=True):
-    cols_def = '\n'.join((f'col{i} INTEGER,' for i in range(cols)))[:-1]
+    cols_def = '\n'.join((f'col{i} INTEGER,' for i in range(cols)))
+    cols_key = ', '.join((f'col{i}' for i in range(cols)))
     table_ddl = f"""CREATE TABLE {table_name} (
 row INTEGER,
 {cols_def}
+KEY ({cols_key}) USING CLUSTERED COLUMNSTORE,
+SHARD KEY (row)
 );"""
     with open(f'{pathbase}.table.sql', 'w') as f:
         f.write(table_ddl)
