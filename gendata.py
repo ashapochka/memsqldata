@@ -9,6 +9,8 @@ import tempfile
 import os
 import shutil
 
+import numpy as np
+
 
 def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
     print(f'starting data generation for {files} files...')
@@ -31,6 +33,37 @@ def gen_data(pathbase, files=1, cols=1, rows=1, gz=True):
         n2 = datetime.now()
         secs = (n2 - n1).total_seconds()
         print(f'{fpath} completed in {secs} secs')
+
+
+def gen_data_np(pathbase, files=1, cols=1, rows=1, gz=True):
+    header = 'row,' + ','.join(f'col{i}' for i in range(cols))
+    cc = list(range(cols))
+    header = ['row'] + [f'col{i}' for i in cc]
+    with tempfile.TemporaryDirectory() as tmpdir:
+        for fi in range(files):
+            n1 = datetime.now()
+            ext = f'{fi}.csv.gz' if gz else f'{fi}.csv'
+            fpath = f'{pathbase}.{ext}'
+            tpath = os.path.join(tmpdir, ext)
+            index = np.arange(fi * rows, (fi + 1) * rows)
+            data = np.random.randint(0, 10, size=(rows, cols))
+            table = np.c_[index, data]
+            with gzip.open(tpath, "w") if gz else open(tpath, "w") as f:
+                fo = io.TextIOWrapper(f) if gz else f
+                w = csv.writer(fo)
+                w.writerow(header)
+                # print(table.tolist()[:3])
+                w.writerows(table.tolist())
+                if gz:
+                    fo.flush()
+            shutil.move(tpath, fpath)
+            # np.savetxt(tpath, table,
+            #            delimiter=',', header=header,
+            #            comments='', fmt='%d')
+            # shutil.move(tpath, fpath)
+            n2 = datetime.now()
+            secs = (n2 - n1).total_seconds()
+            print(f'{fpath} completed in {secs} secs')
 
 
 # noinspection SqlDialectInspection
